@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>간단한 메신저</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/google-translate-api-browser/1.0.9/index.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .chat-container {
+            width: 300px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .message {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            max-width: 80%;
+        }
+        .my-message {
+            background: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+        .other-message {
+            background: #e5e5e5;
+        }
+        .translated-message {
+            font-size: 0.9em;
+            color: #555;
+        }
+        .input-box {
+            display: flex;
+            padding: 10px;
+        }
+        input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px;
+            margin-left: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chatBox"></div>
+        <div class="input-box">
+            <input type="text" id="messageInput" placeholder="메시지를 입력하세요..." onkeydown="handleKeyPress(event)">
+            <button onclick="sendMessage()">전송</button>
+        </div>
+    </div>
+
+    <script>
+        async function translateMessage(message) {
+            const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(message)}&langpair=ko|vi`);
+            const data = await response.json();
+            return data.responseData.translatedText;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById("messageInput");
+            const message = input.value.trim();
+            if (message === "") return;
+
+            const chatBox = document.getElementById("chatBox");
+            const msgElement = document.createElement("div");
+            msgElement.classList.add("message", "my-message");
+            msgElement.textContent = message;
+            chatBox.appendChild(msgElement);
+            
+            const translatedText = await translateMessage(message);
+            const translationElement = document.createElement("div");
+            translationElement.classList.add("translated-message");
+            translationElement.textContent = `(${translatedText})`;
+            msgElement.appendChild(translationElement);
+            
+            input.value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
